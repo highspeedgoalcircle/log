@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>列車長乘務日誌 V11.2</title>
+    <title>列車長乘務日誌 V11.3</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -282,8 +282,27 @@
             font-weight: 500;
         }
 
+        /* 🆕 乘務員擴充方塊樣式 */
+        .steward-toggle-box {
+            background: #f1f3f5;
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #495057;
+            cursor: pointer;
+            border: 1px dashed #ced4da;
+        }
+        .steward-toggle-box input {
+            margin-right: 5px;
+            width: 16px;
+            height: 16px;
+        }
+
         @media print {
-            .btn-stack, .route-setup-box, select { display: none !important; }
+            .btn-stack, .route-setup-box, select, .steward-toggle-box { display: none !important; }
             body { background-color: #fff; padding: 0; }
             .container { box-shadow: none; max-width: 100%; padding: 0; }
             .round-content { display: block !important; }
@@ -293,7 +312,7 @@
 <body onload="restoreFormData()">
 
 <div class="container">
-    <h2>列車長乘務日誌 TEST</h2>
+    <h2>列車長乘務日誌</h2>
     
     <form id="logForm">
         <div class="form-group row">
@@ -364,14 +383,24 @@
                         <div><label>司機姓名</label><input type="text" id="round-${r}-driver" placeholder="司機"></div>
                         <div><label>随車機械師</label><input type="text" id="round-${r}-mechanic" placeholder="機械師"></div>
                     </div>
+                    
                     <div class="form-group row">
                         <div><label>乘務員 1</label><input type="text" id="round-${r}-steward1" placeholder="TA 1"></div>
                         <div><label>乘務員 2</label><input type="text" id="round-${r}-steward2" placeholder="TA 2"></div>
                     </div>
-                    <div class="form-group row">
+
+                    <div id="round-${r}-steward-toggle-wrapper" style="display:none;">
+                        <label class="steward-toggle-box">
+                            <input type="checkbox" id="round-${r}-show-more-stewards" onchange="updateStewardVisibility(${r}); saveFormData();">
+                            <span>➕ 填寫乘務員 3 & 4</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group row" id="round-${r}-steward-extra-row" style="display:none;">
                         <div><label>乘務員 3</label><input type="text" id="round-${r}-steward3" placeholder="TA 3"></div>
                         <div><label>乘務員 4</label><input type="text" id="round-${r}-steward4" placeholder="TA 4"></div>
                     </div>
+
                     <div class="form-group"><label>保潔員姓名</label><input type="text" id="round-${r}-cleaner" placeholder="保潔員"></div>
 
                     <div class="sub-block-title">🚄 一、去程運行記錄表 (西九龍始發)</div>
@@ -384,7 +413,7 @@
                     <div class="sub-block-title">🚄 二、回程運行記錄表 (西九龍終到)</div>
                     <div class="form-group row">
                         <div style="flex: 2;"><label>回車次</label><input type="text" id="round-${r}-DOWN-trainNo" placeholder="GXXXX"></div>
-                        </div>
+                    </div>
                     <div id="round-${r}-DOWN-list"></div>
 
                     <div class="sub-block-title">📊 三、車內人數紀錄</div>
@@ -397,6 +426,29 @@
         renderAllCheckboxes(r);
         generateRouteForDirection(r, 'UP');
         generateRouteForDirection(r, 'DOWN');
+        updateStewardVisibility(r); // 初始化判斷欄位顯示
+    }
+
+    // 🆕 新增函數：控制乘務員3、4號欄位的隱藏和顯示
+    function updateStewardVisibility(roundNum) {
+        const code = document.getElementById(`round-${roundNum}-terminal-code`).value;
+        const toggleWrapper = document.getElementById(`round-${roundNum}-steward-toggle-wrapper`);
+        const extraRow = document.getElementById(`round-${roundNum}-steward-extra-row`);
+        const cbMore = document.getElementById(`round-${roundNum}-show-more-stewards`);
+
+        if (code === 'G658X') {
+            // 廣南車：直接強制顯示 3 和 4，隱藏手動勾選盒
+            toggleWrapper.style.display = 'none';
+            extraRow.style.display = 'flex';
+        } else {
+            // 深北車或福田車：顯示手動勾選盒，根據勾選狀態決定 3 和 4 顯不顯示
+            toggleWrapper.style.display = 'block';
+            if (cbMore && cbMore.checked) {
+                extraRow.style.display = 'flex';
+            } else {
+                extraRow.style.display = 'none';
+            }
+        }
     }
 
     function renderAllCheckboxes(roundNum) {
@@ -423,6 +475,7 @@
         renderAllCheckboxes(roundNum); 
         generateRouteForDirection(roundNum, 'UP'); 
         generateRouteForDirection(roundNum, 'DOWN'); 
+        updateStewardVisibility(roundNum); // 更改車次號段時同步切換乘務員視圖
         saveFormData(); 
     }
 
@@ -477,8 +530,8 @@
     }
 
     function toggleRound(index) {
-        const content = document.getElementById(`content-${index}`);
-        const arrow = document.getElementById(`arrow-${index}`);
+        const content = document.getElementById('content-' + index);
+        const arrow = document.getElementById('arrow-' + index);
         if (content.style.display === "block" || (content.className.includes('active') && content.style.display !== "none")) {
             content.style.display = "none"; content.classList.remove('active'); arrow.innerText = "▲";
         } else {
@@ -545,12 +598,12 @@
             const s3 = document.getElementById(`round-${r}-steward3`).value.trim();
             const s4 = document.getElementById(`round-${r}-steward4`).value.trim();
             const cleaner = document.getElementById(`round-${r}-cleaner`).value.trim();
+            
+            // 無論是否隱藏，只要有內容就打包進去
             const crewList = [s1, s2, s3, s4, cleaner].filter(Boolean).join('/');
 
             ['UP', 'DOWN'].forEach(dir => {
                 const trainNo = document.getElementById(`round-${r}-${dir}-trainNo`).value.trim();
-                
-                // 🚄 保留核心優化：回程直接讀取去程(UP)的車底號輸入值，導出時絕不取消！
                 const carNo = document.getElementById(`round-${r}-UP-carNo`).value.trim();
                 
                 if (!trainNo) return; 
@@ -614,7 +667,7 @@
     }
 
     // ==========================================
-    // 🌟 核心新增功能 1：監聽並自動儲存
+    // 監聽並自動儲存
     // ==========================================
     document.getElementById('logForm').addEventListener('input', () => {
         saveFormData();
@@ -634,9 +687,11 @@
 
         for (let r = 1; r <= 4; r++) {
             const terminalCode = document.getElementById(`round-${r}-terminal-code`).value;
+            const showMoreStewards = document.getElementById(`round-${r}-show-more-stewards`)?.checked || false;
             
             formData.rounds[r] = {
                 terminalCode: terminalCode,
+                showMoreStewards: showMoreStewards,
                 driver: document.getElementById(`round-${r}-driver`).value,
                 mechanic: document.getElementById(`round-${r}-mechanic`).value,
                 steward1: document.getElementById(`round-${r}-steward1`).value,
@@ -677,14 +732,14 @@
                 });
             });
         }
-        localStorage.setItem('trainLogBackup_v11_2', JSON.stringify(formData));
+        localStorage.setItem('trainLogBackup_v11_3', JSON.stringify(formData));
     }
 
     // ==========================================
-    // 🌟 核心新增功能 2：重新打開網頁時自動恢復
+    // 重新打開網頁時自動恢復
     // ==========================================
     function restoreFormData() {
-        const savedData = localStorage.getItem('trainLogBackup_v11_2');
+        const savedData = localStorage.getItem('trainLogBackup_v11_3');
         if (!savedData) return;
 
         try {
@@ -704,6 +759,12 @@
 
                 document.getElementById(`round-${r}-terminal-code`).value = rData.terminalCode;
                 renderAllCheckboxes(r);
+
+                // 還原手動展開勾選狀態
+                const cbMore = document.getElementById(`round-${r}-show-more-stewards`);
+                if (cbMore) cbMore.checked = rData.showMoreStewards || false;
+                
+                updateStewardVisibility(r); // 先更新顯示狀態
 
                 document.getElementById(`round-${r}-driver`).value = rData.driver || '';
                 document.getElementById(`round-${r}-mechanic`).value = rData.mechanic || '';
@@ -750,11 +811,11 @@
     }
 
     // ==========================================
-    // 🌟 核心新增功能 3：清空今日紀錄
+    // 清空今日紀錄
     // ==========================================
     function clearAllLogs() {
         if (confirm('⚠️ 確定要清空今日所有填寫的乘務資料嗎？\n（此操作將無法復原，請確保數據已成功複製並發送給坐堂 TCI）')) {
-            localStorage.removeItem('trainLogBackup_v11_2');
+            localStorage.removeItem('trainLogBackup_v11_3');
             location.reload();
         }
     }

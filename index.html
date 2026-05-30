@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>列車長乘務日誌 V11.2 </title>
+    <title>列車長乘務日誌 V11.2</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -270,6 +270,17 @@
             white-space: normal;
             line-height: 1.4;
         }
+        .clear-btn {
+            width: 100%;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+        }
 
         @media print {
             .btn-stack, .route-setup-box, select { display: none !important; }
@@ -279,7 +290,7 @@
         }
     </style>
 </head>
-<body>
+<body onload="restoreFormData()">
 
 <div class="container">
     <h2>列車長乘務日誌 TEST</h2>
@@ -311,6 +322,7 @@
         <div class="btn-stack">
             <button type="button" class="share-hub-btn" onclick="triggerSystemPrint()">📋 完成後分享PDF到 坐堂 Whatsapp</button>
             <button type="button" class="excel-btn" onclick="copyExcelDataToClipboard()">📊 按鍵將 copy 文字內容檔案<br><span style="font-size:0.85rem; font-weight:normal;">請轉寄給坐堂 TCI 作統計之用</span></button>
+            <button type="button" class="clear-btn" onclick="clearAllLogs()">🧹 清空今日紀錄 (重設新表單)</button>
         </div>
     </form>
 </div>
@@ -403,11 +415,21 @@
     }
 
     function createCheckboxElement(container, roundNum, dirCode, stnName, isChecked) {
-        const html = `<label class="checkbox-item"><input type="checkbox" id="round-${roundNum}-${dirCode}-cb-${stnName}" ${isChecked ? 'checked' : ''} onchange="generateRouteForDirection(${roundNum}, '${dirCode}')"><span>${stnName}</span></label>`;
+        const html = `<label class="checkbox-item"><input type="checkbox" id="round-${roundNum}-${dirCode}-cb-${stnName}" ${isChecked ? 'checked' : ''} onchange="handleCheckboxChange(${roundNum}, '${dirCode}')"><span>${stnName}</span></label>`;
         container.insertAdjacentHTML('beforeend', html);
     }
 
-    function handleTerminalChange(roundNum) { renderAllCheckboxes(roundNum); generateRouteForDirection(roundNum, 'UP'); generateRouteForDirection(roundNum, 'DOWN'); }
+    function handleTerminalChange(roundNum) { 
+        renderAllCheckboxes(roundNum); 
+        generateRouteForDirection(roundNum, 'UP'); 
+        generateRouteForDirection(roundNum, 'DOWN'); 
+        saveFormData(); 
+    }
+
+    function handleCheckboxChange(roundNum, dirCode) {
+        generateRouteForDirection(roundNum, dirCode);
+        saveFormData();
+    }
 
     function generateRouteForDirection(roundNum, dirCode) {
         const code = document.getElementById(`round-${roundNum}-terminal-code`).value;
@@ -468,13 +490,16 @@
         const planTimeStr = document.getElementById(`${idPrefix}-p${type}`).value;
         const actualTimeStr = document.getElementById(`${idPrefix}-a${type}`).value;
         const outputDiv = document.getElementById(`${idPrefix}-err${type}`);
-        if (!planTimeStr || !actualTimeStr) { outputDiv.style.display = "none"; return; }
+        if (!planTimeStr || !actualTimeStr) { if (outputDiv) outputDiv.style.display = "none"; return; }
         const [pH, pM] = planTimeStr.split(':').map(Number); const [aH, aM] = actualTimeStr.split(':').map(Number);
         const diff = (aH * 60 + aM) - (pH * 60 + pM);
+        if (!outputDiv) return;
         outputDiv.style.display = "block"; outputDiv.className = "error-badge";
         if (diff === 0) { outputDiv.innerText = "⏱️ 正點"; outputDiv.classList.add("ontime"); }
         else if (diff > 0) { outputDiv.innerText = `⚠️ 晚點 ${diff} 分`; outputDiv.classList.add("late"); }
         else { outputDiv.innerText = ` 早點 ${Math.abs(diff)} 分`; outputDiv.classList.add("early"); }
+
+        saveFormData(); 
     }
 
     function triggerSystemPrint() {
@@ -525,7 +550,7 @@
             ['UP', 'DOWN'].forEach(dir => {
                 const trainNo = document.getElementById(`round-${r}-${dir}-trainNo`).value.trim();
                 
-                // 🛠️ 核心優化：回程直接讀取去程(UP)的車底號輸入值，免去重複填寫
+                // 🚄 保留核心優化：回程直接讀取去程(UP)的車底號輸入值，導出時絕不取消！
                 const carNo = document.getElementById(`round-${r}-UP-carNo`).value.trim();
                 
                 if (!trainNo) return; 
@@ -585,6 +610,152 @@
         } catch (err) {
             document.body.removeChild(dummyTextarea);
             alert("複製失敗，請確保瀏覽器具有剪貼簿權限。");
+        }
+    }
+
+    // ==========================================
+    // 🌟 核心新增功能 1：監聽並自動儲存
+    // ==========================================
+    document.getElementById('logForm').addEventListener('input', () => {
+        saveFormData();
+    });
+
+    function saveFormData() {
+        const formData = {
+            conductor: document.getElementById('conductor').value,
+            logDate: document.getElementById('logDate').value,
+            dutyNo: document.getElementById('dutyNo').value,
+            dutyTime: document.getElementById('dutyTime').value,
+            issuedLogs: document.getElementById('issuedLogs').value,
+            receivedLogs: document.getElementById('receivedLogs').value,
+            remarks: document.getElementById('remarks').value,
+            rounds: {}
+        };
+
+        for (let r = 1; r <= 4; r++) {
+            const terminalCode = document.getElementById(`round-${r}-terminal-code`).value;
+            
+            formData.rounds[r] = {
+                terminalCode: terminalCode,
+                driver: document.getElementById(`round-${r}-driver`).value,
+                mechanic: document.getElementById(`round-${r}-mechanic`).value,
+                steward1: document.getElementById(`round-${r}-steward1`).value,
+                steward2: document.getElementById(`round-${r}-steward2`).value,
+                steward3: document.getElementById(`round-${r}-steward3`).value,
+                steward4: document.getElementById(`round-${r}-steward4`).value,
+                cleaner: document.getElementById(`round-${r}-cleaner`).value,
+                UP: {
+                    trainNo: document.getElementById(`round-${r}-UP-trainNo`).value,
+                    carNo: document.getElementById(`round-${r}-UP-carNo`).value,
+                    checkboxes: {},
+                    stations: {}
+                },
+                DOWN: {
+                    trainNo: document.getElementById(`round-${r}-DOWN-trainNo`).value,
+                    checkboxes: {},
+                    stations: {}
+                }
+            };
+
+            const upCheckboxes = document.querySelectorAll(`#round-${r}-UP-checkboxes input[type="checkbox"]`);
+            upCheckboxes.forEach(cb => { formData.rounds[r].UP.checkboxes[cb.id] = cb.checked; });
+            const downCheckboxes = document.querySelectorAll(`#round-${r}-DOWN-checkboxes input[type="checkbox"]`);
+            downCheckboxes.forEach(cb => { formData.rounds[r].DOWN.checkboxes[cb.id] = cb.checked; });
+
+            ['UP', 'DOWN'].forEach(dir => {
+                const stations = runtimeActiveStations[r][dir] || [];
+                stations.forEach((stn, idx) => {
+                    const idPrefix = `r${r}-${dir}-${idx}`;
+                    formData.rounds[r][dir].stations[idx] = {
+                        track: document.getElementById(`${idPrefix}-track`)?.value || '',
+                        pArr: document.getElementById(`${idPrefix}-pArr`)?.value || '',
+                        aArr: document.getElementById(`${idPrefix}-aArr`)?.value || '',
+                        pDep: document.getElementById(`${idPrefix}-pDep`)?.value || '',
+                        aDep: document.getElementById(`${idPrefix}-aDep`)?.value || '',
+                        pax: document.getElementById(`r${r}-${dir}-pax-${idx}`)?.value || '0'
+                    };
+                });
+            });
+        }
+        localStorage.setItem('trainLogBackup_v11_2', JSON.stringify(formData));
+    }
+
+    // ==========================================
+    // 🌟 核心新增功能 2：重新打開網頁時自動恢復
+    // ==========================================
+    function restoreFormData() {
+        const savedData = localStorage.getItem('trainLogBackup_v11_2');
+        if (!savedData) return;
+
+        try {
+            const data = JSON.parse(savedData);
+
+            document.getElementById('conductor').value = data.conductor || '';
+            document.getElementById('logDate').value = data.logDate || '';
+            document.getElementById('dutyNo').value = data.dutyNo || '';
+            document.getElementById('dutyTime').value = data.dutyTime || '';
+            document.getElementById('issuedLogs').value = data.issuedLogs || '0';
+            document.getElementById('receivedLogs').value = data.receivedLogs || '0';
+            document.getElementById('remarks').value = data.remarks || '';
+
+            for (let r = 1; r <= 4; r++) {
+                const rData = data.rounds?.[r];
+                if (!rData) continue;
+
+                document.getElementById(`round-${r}-terminal-code`).value = rData.terminalCode;
+                renderAllCheckboxes(r);
+
+                document.getElementById(`round-${r}-driver`).value = rData.driver || '';
+                document.getElementById(`round-${r}-mechanic`).value = rData.mechanic || '';
+                document.getElementById(`round-${r}-steward1`).value = rData.steward1 || '';
+                document.getElementById(`round-${r}-steward2`).value = rData.steward2 || '';
+                document.getElementById(`round-${r}-steward3`).value = rData.steward3 || '';
+                document.getElementById(`round-${r}-steward4`).value = rData.steward4 || '';
+                document.getElementById(`round-${r}-cleaner`).value = rData.cleaner || '';
+
+                ['UP', 'DOWN'].forEach(dir => {
+                    const dirData = rData[dir];
+                    document.getElementById(`round-${r}-${dir}-trainNo`).value = dirData.trainNo || '';
+                    if (dir === 'UP') {
+                        document.getElementById(`round-${r}-UP-carNo`).value = dirData.carNo || '';
+                    }
+
+                    Object.keys(dirData.checkboxes).forEach(cbId => {
+                        const cb = document.getElementById(cbId);
+                        if (cb) cb.checked = dirData.checkboxes[cbId];
+                    });
+                    generateRouteForDirection(r, dir);
+
+                    const stations = runtimeActiveStations[r][dir] || [];
+                    stations.forEach((stn, idx) => {
+                        const idPrefix = `r${r}-${dir}-${idx}`;
+                        const stnData = dirData.stations[idx];
+                        if (stnData) {
+                            if (document.getElementById(`${idPrefix}-track`)) document.getElementById(`${idPrefix}-track`).value = stnData.track;
+                            if (document.getElementById(`${idPrefix}-pArr`)) document.getElementById(`${idPrefix}-pArr`).value = stnData.pArr;
+                            if (document.getElementById(`${idPrefix}-aArr`)) document.getElementById(`${idPrefix}-aArr`).value = stnData.aArr;
+                            if (document.getElementById(`${idPrefix}-pDep`)) document.getElementById(`${idPrefix}-pDep`).value = stnData.pDep;
+                            if (document.getElementById(`${idPrefix}-aDep`)) document.getElementById(`${idPrefix}-aDep`).value = stnData.aDep;
+                            if (document.getElementById(`r${r}-${dir}-pax-${idx}`)) document.getElementById(`r${r}-${dir}-pax-${idx}`).value = stnData.pax;
+                            
+                            calcVerticalError(idPrefix, 'Arr');
+                            calcVerticalError(idPrefix, 'Dep');
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            console.error("還原歷史快取資料失敗", e);
+        }
+    }
+
+    // ==========================================
+    // 🌟 核心新增功能 3：清空今日紀錄
+    // ==========================================
+    function clearAllLogs() {
+        if (confirm('⚠️ 確定要清空今日所有填寫的乘務資料嗎？\n（此操作將無法復原，請確保數據已成功複製並發送給坐堂 TCI）')) {
+            localStorage.removeItem('trainLogBackup_v11_2');
+            location.reload();
         }
     }
 </script>

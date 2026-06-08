@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>列車長乘務日誌 V12.1</title>
+    <title>列車長乘務日誌 V13.1</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -33,6 +33,27 @@
             padding: 12px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        #saveStatus {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #2e7d32;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+        #saveStatus.show {
+            opacity: 1;
         }
 
         h2 {
@@ -83,13 +104,7 @@
             -webkit-appearance: none;
         }
 
-        select {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M0 3l5 5 5-5z' fill='%23666'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 30px;
-        }
-
+        /* 🗺️ 交路設定區塊（移除了原本的下拉選單，純粹顯示中途站選擇） */
         .route-setup-box {
             background: #e3f2fd; 
             padding: 10px; 
@@ -102,7 +117,7 @@
             font-weight: bold; 
             color: #0d47a1; 
             font-size: 0.85rem; 
-            margin-top: 6px;
+            margin-top: 4px;
             margin-bottom: 2px;
         }
 
@@ -116,6 +131,7 @@
             padding: 6px;
             border: 1px solid #ced4da;
             border-radius: 4px;
+            min-height: 32px;
         }
 
         .checkbox-item {
@@ -268,7 +284,28 @@
         }
         .pax-table th { background: #f1f3f5; }
 
-        /* 📸 拍照附件專用樣式 */
+        .quick-text-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .quick-txt-btn {
+            background: #fff;
+            border: 1px solid #b0bec5;
+            color: #37474f;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .quick-txt-btn:hover {
+            background: #eceff1;
+            border-color: #78909c;
+        }
+
         .photo-upload-zone {
             margin-top: 8px;
             background: #f8f9fa;
@@ -388,7 +425,7 @@
         }
 
         @media print {
-            .btn-stack, .route-setup-box, select, .steward-toggle-box, .round-header, .photo-upload-zone .photo-btn-label, .photo-delete-btn { display: none !important; }
+            .btn-stack, .route-setup-box, .steward-toggle-box, .round-header, .photo-upload-zone .photo-btn-label, .photo-delete-btn, .quick-text-wrapper { display: none !important; }
             body { background-color: #fff; padding: 0; }
             .container { box-shadow: none; max-width: 100%; padding: 0; }
             
@@ -401,7 +438,9 @@
         }
     </style>
 </head>
-<body onload="restoreFormData()">
+<body onload="initForm()">
+
+<div id="saveStatus">✓ 已儲存</div>
 
 <div class="container">
     <h2>列車長乘務日誌</h2>
@@ -427,6 +466,14 @@
 
         <div class="section-title">特別事項</div>
         <div class="form-group" style="margin-top: 6px;">
+            <div class="quick-text-wrapper">
+                <button type="button" class="quick-txt-btn" onclick="insertQuickText('旅客不適')">[旅客不適]</button>
+                <button type="button" class="quick-txt-btn" onclick="insertQuickText('乘客投訴')">[乘客投訴]</button>
+                <button type="button" class="quick-txt-btn" onclick="insertQuickText('車門故障')">[車門故障]</button>
+                <button type="button" class="quick-txt-btn" onclick="insertQuickText('設備異常')">[設備異常]</button>
+                <button type="button" class="quick-txt-btn" onclick="insertQuickText('列車晚點')">[列車晚點]</button>
+                <button type="button" class="quick-txt-btn" onclick="insertQuickText('尋人廣播')">[尋人廣播]</button>
+            </div>
             <textarea id="remarks" rows="4" placeholder="請填寫特別事項或異常記錄..."></textarea>
             
             <div class="photo-upload-zone">
@@ -457,7 +504,11 @@
         1: { UP: [], DOWN: [] }, 2: { UP: [], DOWN: [] }, 3: { UP: [], DOWN: [] }, 4: { UP: [], DOWN: [] }
     };
 
+    // 用於記錄每一轉在背後推算出來的車型代碼 (預設為深北車 G56XX)
+    const roundTerminalCodes = { 1: 'G56XX', 2: 'G56XX', 3: 'G56XX', 4: 'G56XX' };
+
     let base64PhotoData = "";
+    let saveTimeout = null;
 
     for (let r = 1; r <= 4; r++) {
         const roundHtml = `
@@ -467,15 +518,14 @@
                     <span id="arrow-${r}">${r === 1 ? '▼' : '▲'}</span>
                 </div>
                 <div class="round-content ${r === 1 ? 'active' : ''}" id="content-${r}">
+                    
+                    <div class="sub-block-title" style="margin-top:5px;">🚄 去程車次與車底號（輸入車次自動推算終點）</div>
+                    <div class="form-group row">
+                        <div><label>去車次</label><input type="text" id="round-${r}-UP-trainNo" placeholder="例: G5612" oninput="handleTrainNoInput(${r})"></div>
+                        <div><label>動車組車底號</label><input type="text" id="round-${r}-UP-carNo" value="CRH380A-025"></div>
+                    </div>
+
                     <div class="route-setup-box">
-                        <div class="form-group">
-                            <label style="color:#0d47a1; font-weight:bold; font-size:0.95rem;">🎯 本來回車次號段類型：</label>
-                            <select id="round-${r}-terminal-code" onchange="handleTerminalChange(${r})">
-                                <option value="G658X">(G658X 廣南車)</option>
-                                <option value="G56XX" selected>(G56XX/G9800 深北車)</option>
-                                <option value="G58XX">(G58XX 福田車)</option>
-                            </select>
-                        </div>
                         <div class="dir-setup-title" style="color: #2e7d32;">🟩 去程中途經停站：</div>
                         <div class="station-checkbox-group" id="round-${r}-UP-checkboxes"></div>
                         <div class="dir-setup-title" style="color: #c62828;">🟥 回程中途經停站：</div>
@@ -484,13 +534,13 @@
 
                     <div class="sub-block-title">👥 乘務人員名單 (本來回共用)</div>
                     <div class="form-group row">
-                        <div><label>司機姓名</label><input type="text" id="round-${r}-driver" placeholder="司機"></div>
-                        <div><label>随車機械師</label><input type="text" id="round-${r}-mechanic" placeholder="機械師"></div>
+                        <div><label>司機姓名</label><input type="text" id="round-${r}-driver" placeholder="司機" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>随車機械師</label><input type="text" id="round-${r}-mechanic" placeholder="機械師" oninput="syncPersonnelToNextRounds(${r})"></div>
                     </div>
                     
                     <div class="form-group row">
-                        <div><label>乘務員 1</label><input type="text" id="round-${r}-steward1" placeholder="TA 1"></div>
-                        <div><label>乘務員 2</label><input type="text" id="round-${r}-steward2" placeholder="TA 2"></div>
+                        <div><label>乘務員 1</label><input type="text" id="round-${r}-steward1" placeholder="TA 1" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>乘務員 2</label><input type="text" id="round-${r}-steward2" placeholder="TA 2" oninput="syncPersonnelToNextRounds(${r})"></div>
                     </div>
 
                     <div id="round-${r}-steward-toggle-wrapper" style="display:none;">
@@ -501,17 +551,13 @@
                     </div>
 
                     <div class="form-group row" id="round-${r}-steward-extra-row" style="display:none;">
-                        <div><label>乘務員 3</label><input type="text" id="round-${r}-steward3" placeholder="TA 3"></div>
-                        <div><label>乘務員 4</label><input type="text" id="round-${r}-steward4" placeholder="TA 4"></div>
+                        <div><label>乘務員 3</label><input type="text" id="round-${r}-steward3" placeholder="TA 3" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>乘務員 4</label><input type="text" id="round-${r}-steward4" placeholder="TA 4" oninput="syncPersonnelToNextRounds(${r})"></div>
                     </div>
 
-                    <div class="form-group"><label>保潔員姓名</label><input type="text" id="round-${r}-cleaner" placeholder="保潔員"></div>
+                    <div class="form-group"><label>保潔員姓名</label><input type="text" id="round-${r}-cleaner" placeholder="保潔員" oninput="syncPersonnelToNextRounds(${r})"></div>
 
                     <div class="sub-block-title">🚄 一、去程運行記錄表 (西九龍始發)</div>
-                    <div class="form-group row">
-                        <div><label>去車次</label><input type="text" id="round-${r}-UP-trainNo" placeholder="GXXXX" oninput="saveFormData()"></div>
-                        <div><label>動車組車底號</label><input type="text" id="round-${r}-UP-carNo" value="CRH380A-025"></div>
-                    </div>
                     <div id="round-${r}-UP-list"></div>
 
                     <div class="sub-block-title">🚄 二、回程運行記錄表 (西九龍終到)</div>
@@ -531,6 +577,74 @@
         generateRouteForDirection(r, 'UP');
         generateRouteForDirection(r, 'DOWN');
         updateStewardVisibility(r);
+    }
+
+    function initForm() {
+        document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+        restoreFormData();
+    }
+
+    function showSaveBadge() {
+        const badge = document.getElementById('saveStatus');
+        badge.classList.add('show');
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => { badge.classList.remove('show'); }, 1500);
+    }
+
+    function syncPersonnelToNextRounds(currentRound) {
+        const fields = ['driver', 'mechanic', 'steward1', 'steward2', 'steward3', 'steward4', 'cleaner'];
+        fields.forEach(field => {
+            const val = document.getElementById(`round-${currentRound}-${field}`).value;
+            for (let n = currentRound + 1; n <= 4; n++) {
+                const nextInput = document.getElementById(`round-${n}-${field}`);
+                if (nextInput) { nextInput.value = val; }
+            }
+        });
+        saveFormData();
+    }
+
+    // 🎯 核心修正：輸入去程車次時，自動推算號段終點並自動刷新對應的中途選單
+    function handleTrainNoInput(roundNum) {
+        const trainNoVal = document.getElementById(`round-${roundNum}-UP-trainNo`).value.trim().toUpperCase();
+        let detectedCode = 'G56XX'; // 預設深北
+
+        if (trainNoVal.includes('G58')) {
+            detectedCode = 'G58XX'; // 福田車
+        } else if (trainNoVal.includes('G56') || trainNoVal.includes('G98')) {
+            detectedCode = 'G56XX'; // 深北車
+        } else if (trainNoVal.includes('G65')) {
+            detectedCode = 'G658X'; // 廣南車
+        }
+
+        // 如果識別出來的號段跟原本的不同，則刷新 Checkboxes
+        if (roundTerminalCodes[roundNum] !== detectedCode) {
+            roundTerminalCodes[roundNum] = detectedCode;
+            renderAllCheckboxes(roundNum);
+            generateRouteForDirection(roundNum, 'UP');
+            generateRouteForDirection(roundNum, 'DOWN');
+            updateStewardVisibility(roundNum);
+        }
+        saveFormData();
+    }
+
+    function insertQuickText(type) {
+        const textarea = document.getElementById('remarks');
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const insertStr = `[${timeStr} ${type}] `;
+        const startPos = textarea.selectionStart;
+        const endPos = textarea.selectionEnd;
+        const oldVal = textarea.value;
+        
+        if (startPos || startPos === 0) {
+            textarea.value = oldVal.substring(0, startPos) + insertStr + oldVal.substring(endPos, oldVal.length);
+            textarea.selectionStart = startPos + insertStr.length;
+            textarea.selectionEnd = startPos + insertStr.length;
+        } else {
+            textarea.value += insertStr;
+        }
+        textarea.focus();
+        saveFormData();
     }
 
     function processAttachmentPhoto(input) {
@@ -573,7 +687,7 @@
     }
 
     function updateStewardVisibility(roundNum) {
-        const code = document.getElementById(`round-${roundNum}-terminal-code`).value;
+        const code = roundTerminalCodes[roundNum];
         const toggleWrapper = document.getElementById(`round-${roundNum}-steward-toggle-wrapper`);
         const extraRow = document.getElementById(`round-${roundNum}-steward-extra-row`);
         const cbMore = document.getElementById(`round-${roundNum}-show-more-stewards`);
@@ -589,7 +703,7 @@
     }
 
     function renderAllCheckboxes(roundNum) {
-        const code = document.getElementById(`round-${roundNum}-terminal-code`).value;
+        const code = roundTerminalCodes[roundNum];
         const terminalName = terminalMapping[code];
         const endIdx = masterStations.indexOf(terminalName);
         const upContainer = document.getElementById(`round-${roundNum}-UP-checkboxes`);
@@ -608,21 +722,13 @@
         container.insertAdjacentHTML('beforeend', html);
     }
 
-    function handleTerminalChange(roundNum) { 
-        renderAllCheckboxes(roundNum); 
-        generateRouteForDirection(roundNum, 'UP'); 
-        generateRouteForDirection(roundNum, 'DOWN'); 
-        updateStewardVisibility(roundNum);
-        saveFormData(); 
-    }
-
     function handleCheckboxChange(roundNum, dirCode) {
         generateRouteForDirection(roundNum, dirCode);
         saveFormData();
     }
 
     function generateRouteForDirection(roundNum, dirCode) {
-        const code = document.getElementById(`round-${roundNum}-terminal-code`).value;
+        const code = roundTerminalCodes[roundNum];
         const terminalName = terminalMapping[code];
         const endIdx = masterStations.indexOf(terminalName);
         let activeStations = [];
@@ -773,7 +879,7 @@
         }
 
         if (validRowsCount === 0) {
-            alert("⚠️ 未檢測到具體乘務內容！請確保您至少填寫了某個來回的「去車次」或「回車次」。");
+            alert("⚠️ 未檢測到具體乘務內容！請確保您至少填寫了某個來回的「去車次」。");
             return;
         }
 
@@ -805,12 +911,12 @@
             receivedLogs: document.getElementById('receivedLogs').value,
             remarks: document.getElementById('remarks').value,
             savedPhoto: base64PhotoData,
+            roundTerminalCodes: roundTerminalCodes, // 備份對應車型
             rounds: {}
         };
 
         for (let r = 1; r <= 4; r++) {
             formData.rounds[r] = {
-                terminalCode: document.getElementById(`round-${r}-terminal-code`).value,
                 showMoreStewards: document.getElementById(`round-${r}-show-more-stewards`)?.checked || false,
                 driver: document.getElementById(`round-${r}-driver`).value,
                 mechanic: document.getElementById(`round-${r}-mechanic`).value,
@@ -852,17 +958,18 @@
                 });
             });
         }
-        localStorage.setItem('trainLogBackup_v12_1', JSON.stringify(formData));
+        localStorage.setItem('trainLogBackup_v13_1', JSON.stringify(formData));
+        showSaveBadge();
     }
 
     function restoreFormData() {
-        const savedData = localStorage.getItem('trainLogBackup_v12_1');
+        const savedData = localStorage.getItem('trainLogBackup_v13_1');
         if (!savedData) return;
 
         try {
             const data = JSON.parse(savedData);
             document.getElementById('conductor').value = data.conductor || '';
-            document.getElementById('logDate').value = data.logDate || '';
+            document.getElementById('logDate').value = data.logDate || new Date().toISOString().split('T')[0];
             document.getElementById('dutyNo').value = data.dutyNo || '';
             document.getElementById('dutyTime').value = data.dutyTime || '';
             document.getElementById('issuedLogs').value = data.issuedLogs || '0';
@@ -875,11 +982,14 @@
                 document.getElementById('photoPreviewWrapper').style.display = 'block';
             }
 
+            if (data.roundTerminalCodes) {
+                Object.assign(roundTerminalCodes, data.roundTerminalCodes);
+            }
+
             for (let r = 1; r <= 4; r++) {
                 const rData = data.rounds?.[r];
                 if (!rData) continue;
 
-                document.getElementById(`round-${r}-terminal-code`).value = rData.terminalCode;
                 renderAllCheckboxes(r);
 
                 const cbMore = document.getElementById(`round-${r}-show-more-stewards`);
@@ -894,11 +1004,12 @@
                 document.getElementById(`round-${r}-steward4`).value = rData.steward4 || '';
                 document.getElementById(`round-${r}-cleaner`).value = rData.cleaner || '';
 
+                document.getElementById(`round-${r}-UP-trainNo`).value = rData.UP.trainNo || '';
+                document.getElementById(`round-${r}-UP-carNo`).value = rData.UP.carNo || '';
+                document.getElementById(`round-${r}-DOWN-trainNo`).value = rData.DOWN.trainNo || '';
+
                 ['UP', 'DOWN'].forEach(dir => {
                     const dirData = rData[dir];
-                    document.getElementById(`round-${r}-${dir}-trainNo`).value = dirData.trainNo || '';
-                    if (dir === 'UP') { document.getElementById(`round-${r}-UP-carNo`).value = dirData.carNo || ''; }
-
                     Object.keys(dirData.checkboxes).forEach(cbId => {
                         const cb = document.getElementById(cbId);
                         if (cb) cb.checked = dirData.checkboxes[cbId];
@@ -930,7 +1041,7 @@
 
     function clearAllLogs() {
         if (confirm('⚠️ 確定要清空今日所有填寫的乘務資料嗎？\n（此操作將無法復原，請確保數據已成功複製並發送給坐堂 TCI）')) {
-            localStorage.removeItem('trainLogBackup_v12_1');
+            localStorage.removeItem('trainLogBackup_v13_1');
             location.reload();
         }
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>列車長乘務日誌 V13.1</title>
+    <title>列車長乘務日誌 V13.8</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -104,7 +104,6 @@
             -webkit-appearance: none;
         }
 
-        /* 🗺️ 交路設定區塊（移除了原本的下拉選單，純粹顯示中途站選擇） */
         .route-setup-box {
             background: #e3f2fd; 
             padding: 10px; 
@@ -442,12 +441,216 @@
 
 <div id="saveStatus">✓ 已儲存</div>
 
+<datalist id="conductorList">
+    <option value="葉曾璐"></option>
+    <option value="劉煒立"></option>
+    <option value="蘇基智"></option>
+    <option value="黃丹鳳"></option>
+    <option value="蔡志祥"></option>
+    <option value="陳婉儀"></option>
+    <option value="周葆茹"></option>
+    <option value="朱傑權"></option>
+    <option value="朱岩志"></option>
+    <option value="樊慧成"></option>
+    <option value="馮開湛"></option>
+    <option value="韓建鋒"></option>
+    <option value="許楊林"></option>
+    <option value="洪文怡"></option>
+    <option value="葛敏嫻"></option>
+    <option value="賴頌恆"></option>
+    <option value="羅凱欣"></option>
+    <option value="梁曉靜"></option>
+    <option value="羅國洋"></option>
+    <option value="盧子樂"></option>
+    <option value="陸美兒"></option>
+    <option value="麥可筠"></option>
+    <option value="吳健輝"></option>
+    <option value="薛永棠"></option>
+    <option value="宋永欣"></option>
+    <option value="丁婉灜"></option>
+    <option value="曾逸環"></option>
+    <option value="黃輝騰"></option>
+    <option value="王浩麟"></option>
+    <option value="黃治中"></option>
+    <option value="鄔焯軒"></option>
+    <option value="胡金慶"></option>
+    <option value="余世昌"></option>
+    <option value="袁麗娟"></option>
+</datalist>
+
+<datalist id="driverList">
+    <option value="陳卓耀"></option>
+    <option value="陳志龍"></option>
+    <option value="陳俊熹"></option>
+    <option value="陳俊球"></option>
+    <option value="陳惲霆"></option>
+    <option value="蔣家偉"></option>
+    <option value="鍾梓煒"></option>
+    <option value="范熙民"></option>
+    <option value="霍建文"></option>
+    <option value="馮景禧"></option>
+    <option value="何君興"></option>
+    <option value="許嘉智"></option>
+    <option value="許國健"></option>
+    <option value="葉金生"></option>
+    <option value="姜智仁"></option>
+    <option value="高啟輝"></option>
+    <option value="江靜航"></option>
+    <option value="古建忠"></option>
+    <option value="林嘉輝"></option>
+    <option value="林偉健"></option>
+    <option value="藍偉綸"></option>
+    <option value="李向榮"></option>
+    <option value="李偉棟"></option>
+    <option value="李潤超"></option>
+    <option value="梁湛文"></option>
+    <option value="梁綽芹"></option>
+    <option value="吳俊霆"></option>
+    <option value="吳紀安"></option>
+    <option value="潘浩峰"></option>
+    <option value="杜志城"></option>
+    <option value="黃非凡"></option>
+    <option value="黃嘉駿"></option>
+    <option value="黃君榮"></option>
+    <option value="黃銳斌"></option>
+    <option value="殷耀康"></option>
+    <option value="尤烱軒"></option>
+    <option value="余意"></option>
+    <option value="袁國文"></option>
+    <option value="袁文亮"></option>
+    <option value="張劍華"></option>
+    <option value="李盛強"></option>
+    <option value="盧嘉成"></option>
+    <option value="胡漢威"></option>
+    <option value="嚴百堅"></option>
+</datalist>
+
+<datalist id="mechanicList">
+    <option value="高健生"></option>
+    <option value="莫嘉亮"></option>
+    <option value="許建武"></option>
+    <option value="陳俊暉"></option>
+    <option value="劉俊樂"></option>
+    <option value="羅立基"></option>
+    <option value="吳志龍"></option>
+    <option value="何羨恒"></option>
+    <option value="文中信"></option>
+    <option value="毛建明"></option>
+    <option value="李保年"></option>
+    <option value="莫子康"></option>
+    <option value="鄧浩賢"></option>
+    <option value="謝紹才"></option>
+    <option value="葉志豐"></option>
+    <option value="馬啟文"></option>
+    <option value="黃福榮"></option>
+    <option value="余欣彥"></option>
+    <option value="余俊達"></option>
+    <option value="徐東宇"></option>
+    <option value="黃家銘"></option>
+    <option value="蔡景風"></option>
+    <option value="賴志明"></option>
+    <option value="向家朗"></option>
+    <option value="翁偉南"></option>
+    <option value="梁淳稀"></option>
+    <option value="曾智德"></option>
+    <option value="曾運添"></option>
+    <option value="馮振豪"></option>
+    <option value="劉祥春"></option>
+</datalist>
+
+<datalist id="staffList">
+    <option value="郭家豪"></option>
+    <option value="黎鈺婷"></option>
+    <option value="吳學智"></option>
+    <option value="鄧松麗"></option>
+    <option value="任嘉豪"></option>
+    <option value="何卓男"></option>
+    <option value="陸惠敏"></option>
+    <option value="吳家輝"></option>
+    <option value="鍾倩怡"></option>
+    <option value="賴惠聰"></option>
+    <option value="藍虹梅"></option>
+    <option value="施丹妮"></option>
+    <option value="譚穎儀"></option>
+    <option value="周建希"></option>
+    <option value="梁淑勳"></option>
+    <option value="羅偉豪"></option>
+    <option value="譚潔茹"></option>
+    <option value="黃莉春"></option>
+    <option value="徐麗恩"></option>
+    <option value="吳燕玉"></option>
+    <option value="羅駿麒"></option>
+    <option value="陳芷營"></option>
+    <option value="黃宇煊"></option>
+    <option value="張韻琪"></option>
+    <option value="陳曉瑩"></option>
+    <option value="鍾旻禧"></option>
+    <option value="徐浩然"></option>
+    <option value="宋倩兒"></option>
+    <option value="馬思婷"></option>
+    <option value="麥綺媚"></option>
+    <option value="徐家欣"></option>
+    <option value="陳彩霞"></option>
+    <option value="蕭黎"></option>
+    <option value="陳廣明"></option>
+    <option value="郭蘇紫怡"></option>
+    <option value="鄧智健"></option>
+    <option value="陳麗霞"></option>
+    <option value="楊洋"></option>
+    <option value="廖源婷"></option>
+    <option value="葉佩澄"></option>
+    <option value="劉素枝"></option>
+    <option value="梁德成"></option>
+    <option value="劉孝禮"></option>
+    <option value="劉旺恒"></option>
+    <option value="鍾惠韻"></option>
+    <option value="黎芷穎"></option>
+    <option value="林嘉瑤"></option>
+    <option value="陳麗華"></option>
+    <option value="吳彥玲"></option>
+    <option value="杜曼霞"></option>
+    <option value="孫沛帆"></option>
+    <option value="馮樂瑤"></option>
+    <option value="李嘉怡"></option>
+    <option value="郭杜見"></option>
+    <option value="許淑賢"></option>
+    <option value="姚茜茹"></option>
+    <option value="陶綺琳"></option>
+    <option value="勞綺婷"></option>
+    <option value="吳嘉琪"></option>
+    <option value="吳佩容"></option>
+    <option value="馬嘉儀"></option>
+    <option value="宋嘉怡"></option>
+    <option value="李柏欣"></option>
+    <option value="李雪茹"></option>
+</datalist>
+
+<datalist id="cleanerList">
+    <option value="何鳳屏"></option>
+    <option value="李妙素"></option>
+    <option value="李健仙"></option>
+    <option value="徐偉新"></option>
+    <option value="徐艷"></option>
+    <option value="陳美雙"></option>
+    <option value="劉土妹"></option>
+    <option value="盧錦梅"></option>
+    <option value="黃亞強"></option>
+    <option value="羅新鳳"></option>
+    <option value="黃潤梨"></option>
+    <option value="陽小英"></option>
+    <option value="李雪因"></option>
+    <option value="周燕清"></option>
+    <option value="梁麗燕"></option>
+    <option value="馬玉蘭"></option>
+    <option value="梁愛瓊"></option>
+</datalist>
+
 <div class="container">
     <h2>列車長乘務日誌</h2>
     
     <form id="logForm">
         <div class="form-group row">
-            <div><label>列車長</label><input type="text" id="conductor" required placeholder="姓名"></div>
+            <div><label>列車長</label><input type="text" id="conductor" required placeholder="點擊選擇列車長" list="conductorList"></div>
             <div><label>日期</label><input type="date" id="logDate" required></div>
         </div>
         <div class="form-group row">
@@ -504,7 +707,6 @@
         1: { UP: [], DOWN: [] }, 2: { UP: [], DOWN: [] }, 3: { UP: [], DOWN: [] }, 4: { UP: [], DOWN: [] }
     };
 
-    // 用於記錄每一轉在背後推算出來的車型代碼 (預設為深北車 G56XX)
     const roundTerminalCodes = { 1: 'G56XX', 2: 'G56XX', 3: 'G56XX', 4: 'G56XX' };
 
     let base64PhotoData = "";
@@ -534,28 +736,28 @@
 
                     <div class="sub-block-title">👥 乘務人員名單 (本來回共用)</div>
                     <div class="form-group row">
-                        <div><label>司機姓名</label><input type="text" id="round-${r}-driver" placeholder="司機" oninput="syncPersonnelToNextRounds(${r})"></div>
-                        <div><label>随車機械師</label><input type="text" id="round-${r}-mechanic" placeholder="機械師" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>司機姓名</label><input type="text" id="round-${r}-driver" placeholder="點選或輸入" list="driverList" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>随車機械師</label><input type="text" id="round-${r}-mechanic" placeholder="點選或輸入" list="mechanicList" oninput="syncPersonnelToNextRounds(${r})"></div>
                     </div>
                     
                     <div class="form-group row">
-                        <div><label>乘務員 1</label><input type="text" id="round-${r}-steward1" placeholder="TA 1" oninput="syncPersonnelToNextRounds(${r})"></div>
-                        <div><label>乘務員 2</label><input type="text" id="round-${r}-steward2" placeholder="TA 2" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>乘務員 1 (TA1)</label><input type="text" id="round-${r}-steward1" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>乘務員 2 (TA2)</label><input type="text" id="round-${r}-steward2" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
                     </div>
 
                     <div id="round-${r}-steward-toggle-wrapper" style="display:none;">
                         <label class="steward-toggle-box">
                             <input type="checkbox" id="round-${r}-show-more-stewards" onchange="updateStewardVisibility(${r}); saveFormData();">
-                            <span>➕ 填寫乘務員 3 & 4</span>
+                            <span>➕ 填寫乘務員 3 & 4 (TA3/4)</span>
                         </label>
                     </div>
 
                     <div class="form-group row" id="round-${r}-steward-extra-row" style="display:none;">
-                        <div><label>乘務員 3</label><input type="text" id="round-${r}-steward3" placeholder="TA 3" oninput="syncPersonnelToNextRounds(${r})"></div>
-                        <div><label>乘務員 4</label><input type="text" id="round-${r}-steward4" placeholder="TA 4" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>乘務員 3 (TA3)</label><input type="text" id="round-${r}-steward3" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div><label>乘務員 4 (TA4)</label><input type="text" id="round-${r}-steward4" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
                     </div>
 
-                    <div class="form-group"><label>保潔員姓名</label><input type="text" id="round-${r}-cleaner" placeholder="保潔員" oninput="syncPersonnelToNextRounds(${r})"></div>
+                    <div class="form-group"><label>保潔員姓名</label><input type="text" id="round-${r}-cleaner" placeholder="點選或輸入保潔人員" list="cleanerList" oninput="syncPersonnelToNextRounds(${r})"></div>
 
                     <div class="sub-block-title">🚄 一、去程運行記錄表 (西九龍始發)</div>
                     <div id="round-${r}-UP-list"></div>
@@ -603,20 +805,18 @@
         saveFormData();
     }
 
-    // 🎯 核心修正：輸入去程車次時，自動推算號段終點並自動刷新對應的中途選單
     function handleTrainNoInput(roundNum) {
         const trainNoVal = document.getElementById(`round-${roundNum}-UP-trainNo`).value.trim().toUpperCase();
-        let detectedCode = 'G56XX'; // 預設深北
+        let detectedCode = 'G56XX';
 
         if (trainNoVal.includes('G58')) {
-            detectedCode = 'G58XX'; // 福田車
+            detectedCode = 'G58XX';
         } else if (trainNoVal.includes('G56') || trainNoVal.includes('G98')) {
-            detectedCode = 'G56XX'; // 深北車
+            detectedCode = 'G56XX';
         } else if (trainNoVal.includes('G65')) {
-            detectedCode = 'G658X'; // 廣南車
+            detectedCode = 'G658X';
         }
 
-        // 如果識別出來的號段跟原本的不同，則刷新 Checkboxes
         if (roundTerminalCodes[roundNum] !== detectedCode) {
             roundTerminalCodes[roundNum] = detectedCode;
             renderAllCheckboxes(roundNum);
@@ -702,6 +902,7 @@
         }
     }
 
+    // 渲染複選框
     function renderAllCheckboxes(roundNum) {
         const code = roundTerminalCodes[roundNum];
         const terminalName = terminalMapping[code];
@@ -911,7 +1112,7 @@
             receivedLogs: document.getElementById('receivedLogs').value,
             remarks: document.getElementById('remarks').value,
             savedPhoto: base64PhotoData,
-            roundTerminalCodes: roundTerminalCodes, // 備份對應車型
+            roundTerminalCodes: roundTerminalCodes,
             rounds: {}
         };
 
@@ -958,12 +1159,12 @@
                 });
             });
         }
-        localStorage.setItem('trainLogBackup_v13_1', JSON.stringify(formData));
+        localStorage.setItem('trainLogBackup_v13_8', JSON.stringify(formData));
         showSaveBadge();
     }
 
     function restoreFormData() {
-        const savedData = localStorage.getItem('trainLogBackup_v13_1');
+        const savedData = localStorage.getItem('trainLogBackup_v13_8');
         if (!savedData) return;
 
         try {
@@ -1041,7 +1242,7 @@
 
     function clearAllLogs() {
         if (confirm('⚠️ 確定要清空今日所有填寫的乘務資料嗎？\n（此操作將無法復原，請確保數據已成功複製並發送給坐堂 TCI）')) {
-            localStorage.removeItem('trainLogBackup_v13_1');
+            localStorage.removeItem('trainLogBackup_v13_8');
             location.reload();
         }
     }

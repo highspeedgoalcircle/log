@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>列車長乘務日誌 V13.8</title>
+    <title>列車長乘務日誌 V13.9</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -75,6 +75,7 @@
 
         .form-group {
             margin-bottom: 10px;
+            position: relative;
         }
 
         .form-group.row {
@@ -84,6 +85,7 @@
 
         .form-group.row > div {
             flex: 1;
+            position: relative;
         }
 
         label {
@@ -101,7 +103,55 @@
             border-radius: 4px;
             font-size: 0.95rem;
             background-color: #fff;
-            -webkit-appearance: none;
+        }
+
+        /* 🔍 智能下拉選單專用樣式 */
+        .custom-dropdown {
+            position: relative;
+        }
+        .custom-dropdown input[type="text"] {
+            padding-right: 24px; /* 留位置給箭頭 */
+        }
+        .custom-dropdown::after {
+            content: "▼";
+            font-size: 0.65rem;
+            color: #6c757d;
+            position: absolute;
+            right: 10px;
+            top: 33px;
+            pointer-events: none;
+            transition: transform 0.2s;
+        }
+        .form-group.row .custom-dropdown::after {
+            top: 31px; /* 修正雙排排版下的箭頭高度 */
+        }
+        .dropdown-menu-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+        }
+        .dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .dropdown-item:hover {
+            background-color: #f1f3f5;
+            color: var(--primary-color);
+        }
+        .dropdown-item.no-match {
+            color: #999;
+            cursor: default;
+            background: none !important;
         }
 
         .route-setup-box {
@@ -424,7 +474,7 @@
         }
 
         @media print {
-            .btn-stack, .route-setup-box, .steward-toggle-box, .round-header, .photo-upload-zone .photo-btn-label, .photo-delete-btn, .quick-text-wrapper { display: none !important; }
+            .btn-stack, .route-setup-box, .steward-toggle-box, .round-header, .photo-upload-zone .photo-btn-label, .photo-delete-btn, .quick-text-wrapper, .custom-dropdown::after { display: none !important; }
             body { background-color: #fff; padding: 0; }
             .container { box-shadow: none; max-width: 100%; padding: 0; }
             
@@ -441,216 +491,16 @@
 
 <div id="saveStatus">✓ 已儲存</div>
 
-<datalist id="conductorList">
-    <option value="葉曾璐"></option>
-    <option value="劉煒立"></option>
-    <option value="蘇基智"></option>
-    <option value="黃丹鳳"></option>
-    <option value="蔡志祥"></option>
-    <option value="陳婉儀"></option>
-    <option value="周葆茹"></option>
-    <option value="朱傑權"></option>
-    <option value="朱岩志"></option>
-    <option value="樊慧成"></option>
-    <option value="馮開湛"></option>
-    <option value="韓建鋒"></option>
-    <option value="許楊林"></option>
-    <option value="洪文怡"></option>
-    <option value="葛敏嫻"></option>
-    <option value="賴頌恆"></option>
-    <option value="羅凱欣"></option>
-    <option value="梁曉靜"></option>
-    <option value="羅國洋"></option>
-    <option value="盧子樂"></option>
-    <option value="陸美兒"></option>
-    <option value="麥可筠"></option>
-    <option value="吳健輝"></option>
-    <option value="薛永棠"></option>
-    <option value="宋永欣"></option>
-    <option value="丁婉灜"></option>
-    <option value="曾逸環"></option>
-    <option value="黃輝騰"></option>
-    <option value="王浩麟"></option>
-    <option value="黃治中"></option>
-    <option value="鄔焯軒"></option>
-    <option value="胡金慶"></option>
-    <option value="余世昌"></option>
-    <option value="袁麗娟"></option>
-</datalist>
-
-<datalist id="driverList">
-    <option value="陳卓耀"></option>
-    <option value="陳志龍"></option>
-    <option value="陳俊熹"></option>
-    <option value="陳俊球"></option>
-    <option value="陳惲霆"></option>
-    <option value="蔣家偉"></option>
-    <option value="鍾梓煒"></option>
-    <option value="范熙民"></option>
-    <option value="霍建文"></option>
-    <option value="馮景禧"></option>
-    <option value="何君興"></option>
-    <option value="許嘉智"></option>
-    <option value="許國健"></option>
-    <option value="葉金生"></option>
-    <option value="姜智仁"></option>
-    <option value="高啟輝"></option>
-    <option value="江靜航"></option>
-    <option value="古建忠"></option>
-    <option value="林嘉輝"></option>
-    <option value="林偉健"></option>
-    <option value="藍偉綸"></option>
-    <option value="李向榮"></option>
-    <option value="李偉棟"></option>
-    <option value="李潤超"></option>
-    <option value="梁湛文"></option>
-    <option value="梁綽芹"></option>
-    <option value="吳俊霆"></option>
-    <option value="吳紀安"></option>
-    <option value="潘浩峰"></option>
-    <option value="杜志城"></option>
-    <option value="黃非凡"></option>
-    <option value="黃嘉駿"></option>
-    <option value="黃君榮"></option>
-    <option value="黃銳斌"></option>
-    <option value="殷耀康"></option>
-    <option value="尤烱軒"></option>
-    <option value="余意"></option>
-    <option value="袁國文"></option>
-    <option value="袁文亮"></option>
-    <option value="張劍華"></option>
-    <option value="李盛強"></option>
-    <option value="盧嘉成"></option>
-    <option value="胡漢威"></option>
-    <option value="嚴百堅"></option>
-</datalist>
-
-<datalist id="mechanicList">
-    <option value="高健生"></option>
-    <option value="莫嘉亮"></option>
-    <option value="許建武"></option>
-    <option value="陳俊暉"></option>
-    <option value="劉俊樂"></option>
-    <option value="羅立基"></option>
-    <option value="吳志龍"></option>
-    <option value="何羨恒"></option>
-    <option value="文中信"></option>
-    <option value="毛建明"></option>
-    <option value="李保年"></option>
-    <option value="莫子康"></option>
-    <option value="鄧浩賢"></option>
-    <option value="謝紹才"></option>
-    <option value="葉志豐"></option>
-    <option value="馬啟文"></option>
-    <option value="黃福榮"></option>
-    <option value="余欣彥"></option>
-    <option value="余俊達"></option>
-    <option value="徐東宇"></option>
-    <option value="黃家銘"></option>
-    <option value="蔡景風"></option>
-    <option value="賴志明"></option>
-    <option value="向家朗"></option>
-    <option value="翁偉南"></option>
-    <option value="梁淳稀"></option>
-    <option value="曾智德"></option>
-    <option value="曾運添"></option>
-    <option value="馮振豪"></option>
-    <option value="劉祥春"></option>
-</datalist>
-
-<datalist id="staffList">
-    <option value="郭家豪"></option>
-    <option value="黎鈺婷"></option>
-    <option value="吳學智"></option>
-    <option value="鄧松麗"></option>
-    <option value="任嘉豪"></option>
-    <option value="何卓男"></option>
-    <option value="陸惠敏"></option>
-    <option value="吳家輝"></option>
-    <option value="鍾倩怡"></option>
-    <option value="賴惠聰"></option>
-    <option value="藍虹梅"></option>
-    <option value="施丹妮"></option>
-    <option value="譚穎儀"></option>
-    <option value="周建希"></option>
-    <option value="梁淑勳"></option>
-    <option value="羅偉豪"></option>
-    <option value="譚潔茹"></option>
-    <option value="黃莉春"></option>
-    <option value="徐麗恩"></option>
-    <option value="吳燕玉"></option>
-    <option value="羅駿麒"></option>
-    <option value="陳芷營"></option>
-    <option value="黃宇煊"></option>
-    <option value="張韻琪"></option>
-    <option value="陳曉瑩"></option>
-    <option value="鍾旻禧"></option>
-    <option value="徐浩然"></option>
-    <option value="宋倩兒"></option>
-    <option value="馬思婷"></option>
-    <option value="麥綺媚"></option>
-    <option value="徐家欣"></option>
-    <option value="陳彩霞"></option>
-    <option value="蕭黎"></option>
-    <option value="陳廣明"></option>
-    <option value="郭蘇紫怡"></option>
-    <option value="鄧智健"></option>
-    <option value="陳麗霞"></option>
-    <option value="楊洋"></option>
-    <option value="廖源婷"></option>
-    <option value="葉佩澄"></option>
-    <option value="劉素枝"></option>
-    <option value="梁德成"></option>
-    <option value="劉孝禮"></option>
-    <option value="劉旺恒"></option>
-    <option value="鍾惠韻"></option>
-    <option value="黎芷穎"></option>
-    <option value="林嘉瑤"></option>
-    <option value="陳麗華"></option>
-    <option value="吳彥玲"></option>
-    <option value="杜曼霞"></option>
-    <option value="孫沛帆"></option>
-    <option value="馮樂瑤"></option>
-    <option value="李嘉怡"></option>
-    <option value="郭杜見"></option>
-    <option value="許淑賢"></option>
-    <option value="姚茜茹"></option>
-    <option value="陶綺琳"></option>
-    <option value="勞綺婷"></option>
-    <option value="吳嘉琪"></option>
-    <option value="吳佩容"></option>
-    <option value="馬嘉儀"></option>
-    <option value="宋嘉怡"></option>
-    <option value="李柏欣"></option>
-    <option value="李雪茹"></option>
-</datalist>
-
-<datalist id="cleanerList">
-    <option value="何鳳屏"></option>
-    <option value="李妙素"></option>
-    <option value="李健仙"></option>
-    <option value="徐偉新"></option>
-    <option value="徐艷"></option>
-    <option value="陳美雙"></option>
-    <option value="劉土妹"></option>
-    <option value="盧錦梅"></option>
-    <option value="黃亞強"></option>
-    <option value="羅新鳳"></option>
-    <option value="黃潤梨"></option>
-    <option value="陽小英"></option>
-    <option value="李雪因"></option>
-    <option value="周燕清"></option>
-    <option value="梁麗燕"></option>
-    <option value="馬玉蘭"></option>
-    <option value="梁愛瓊"></option>
-</datalist>
-
 <div class="container">
     <h2>列車長乘務日誌</h2>
     
-    <form id="logForm">
+    <form id="logForm" autocomplete="off">
         <div class="form-group row">
-            <div><label>列車長</label><input type="text" id="conductor" required placeholder="點擊選擇列車長" list="conductorList"></div>
+            <div class="custom-dropdown">
+                <label>列車長</label>
+                <input type="text" id="conductor" required placeholder="點擊選擇或搜尋" onfocus="showDropMenu(this, 'conductor')" oninput="filterDropMenu(this, 'conductor')">
+                <div class="dropdown-menu-box" id="menu-conductor"></div>
+            </div>
             <div><label>日期</label><input type="date" id="logDate" required></div>
         </div>
         <div class="form-group row">
@@ -699,6 +549,15 @@
 </div>
 
 <script>
+    // 📊 各職別核心數據庫
+    const rawLists = {
+        conductor: ["葉曾璐","劉煒立","蘇基智","黃丹鳳","蔡志祥","陳婉儀","周葆茹","朱傑權","朱岩志","樊慧成","馮開湛","韓建鋒","許楊林","洪文怡","葛敏嫻","賴頌恆","羅凱欣","梁曉靜","羅國洋","盧子樂","陸美兒","麥可筠","吳健輝","薛永棠","宋永欣","丁婉灜","曾逸環","黃輝騰","王浩麟","黃治中","鄔焯軒","胡金慶","余世昌","袁麗娟"],
+        driver: ["陳卓耀","陳志龍","陳俊熹","陳俊球","陳惲霆","蔣家偉","鍾梓煒","范熙民","霍建文","馮景禧","何君興","許嘉智","許國健","葉金生","姜智仁","高啟輝","江靜航","古建忠","林嘉輝","林偉健","藍偉綸","李向榮","李偉棟","李潤超","梁湛文","梁綽芹","吳俊霆","吳紀安","潘浩峰","杜志城","黃非凡","黃嘉駿","黃君榮","黃銳斌","殷耀康","尤烱軒","余意","袁國文","袁文亮","張劍華","李盛強","盧嘉成","胡漢威","嚴百堅"],
+        mechanic: ["高健生","莫嘉亮","許建武","陳俊暉","劉俊樂","羅立基","吳志龍","何羨恒","文中信","毛建明","李保年","莫子康","鄧浩賢","謝紹才","葉志豐","馬啟文","黃福榮","余欣彥","余俊達","徐東宇","黃家銘","蔡景風","賴志明","向家朗","翁偉南","梁淳稀","曾智德","曾運添","馮振豪","劉祥春"],
+        staff: ["郭家豪","黎鈺婷","吳學智","鄧松麗","任嘉豪","何卓男","陸惠敏","吳家輝","鍾倩怡","賴惠聰","藍虹梅","施丹妮","譚穎儀","周建希","梁淑勳","羅偉豪","譚潔茹","黃莉春","徐麗恩","吳燕玉","羅駿麒","陳芷營","黃宇煊","張韻琪","陳曉瑩","鍾旻禧","徐浩然","宋倩兒","馬思婷","麥綺媚","徐家欣","陳彩霞","蕭黎","陳廣明","郭蘇紫怡","鄧智健","陳麗霞","楊洋","廖源婷","葉佩澄","劉素枝","梁德成","劉孝禮","劉旺恒","鍾惠韻","黎芷穎","林嘉瑤","陳麗華","吳彥玲","杜曼霞","孫沛帆","馮樂瑤","李嘉怡","郭杜見","許淑賢","姚茜茹","陶綺琳","勞綺婷","吳嘉琪","吳佩容","馬嘉儀","宋嘉怡","李柏欣","李雪茹"],
+        cleaner: ["何鳳屏","李妙素","李健仙","徐偉新","徐艷","陳美雙","劉土妹","盧錦梅","黃亞強","羅新鳳","黃潤梨","陽小英","李雪因","周燕清","梁麗燕","馬玉蘭","梁愛瓊"]
+    };
+
     const container = document.getElementById('roundsContainer');
     const masterStations = ['西九龍', '福田', '深圳北', '光明城', '虎門', '南沙北', '廣州南'];
     const terminalMapping = { 'G658X': '廣州南', 'G56XX': '深圳北', 'G58XX': '福田' };
@@ -712,6 +571,7 @@
     let base64PhotoData = "";
     let saveTimeout = null;
 
+    // 動態生成 4 個來回的區塊
     for (let r = 1; r <= 4; r++) {
         const roundHtml = `
             <div class="round-accordion">
@@ -721,7 +581,7 @@
                 </div>
                 <div class="round-content ${r === 1 ? 'active' : ''}" id="content-${r}">
                     
-                    <div class="sub-block-title" style="margin-top:5px;">🚄 去程車次與車底號（輸入車次自動推算終點）</div>
+                    <div class="sub-block-title" style="margin-top:5px;">🚄 去程車次與車底號</div>
                     <div class="form-group row">
                         <div><label>去車次</label><input type="text" id="round-${r}-UP-trainNo" placeholder="例: G5612" oninput="handleTrainNoInput(${r})"></div>
                         <div><label>動車組車底號</label><input type="text" id="round-${r}-UP-carNo" value="CRH380A-025"></div>
@@ -736,13 +596,29 @@
 
                     <div class="sub-block-title">👥 乘務人員名單 (本來回共用)</div>
                     <div class="form-group row">
-                        <div><label>司機姓名</label><input type="text" id="round-${r}-driver" placeholder="點選或輸入" list="driverList" oninput="syncPersonnelToNextRounds(${r})"></div>
-                        <div><label>随車機械師</label><input type="text" id="round-${r}-mechanic" placeholder="點選或輸入" list="mechanicList" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div class="custom-dropdown">
+                            <label>司機姓名</label>
+                            <input type="text" id="round-${r}-driver" placeholder="點選或搜尋" onfocus="showDropMenu(this, 'driver', ${r})" oninput="filterDropMenu(this, 'driver', ${r})">
+                            <div class="dropdown-menu-box" id="menu-round-${r}-driver"></div>
+                        </div>
+                        <div class="custom-dropdown">
+                            <label>随車機械師</label>
+                            <input type="text" id="round-${r}-mechanic" placeholder="點選或搜尋" onfocus="showDropMenu(this, 'mechanic', ${r})" oninput="filterDropMenu(this, 'mechanic', ${r})">
+                            <div class="dropdown-menu-box" id="menu-round-${r}-mechanic"></div>
+                        </div>
                     </div>
                     
                     <div class="form-group row">
-                        <div><label>乘務員 1 (TA1)</label><input type="text" id="round-${r}-steward1" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
-                        <div><label>乘務員 2 (TA2)</label><input type="text" id="round-${r}-steward2" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div class="custom-dropdown">
+                            <label>乘務員 1 (TA1)</label>
+                            <input type="text" id="round-${r}-steward1" placeholder="點選或搜尋" onfocus="showDropMenu(this, 'staff', ${r}, 1)" oninput="filterDropMenu(this, 'staff', ${r}, 1)">
+                            <div class="dropdown-menu-box" id="menu-round-${r}-steward1"></div>
+                        </div>
+                        <div class="custom-dropdown">
+                            <label>乘務員 2 (TA2)</label>
+                            <input type="text" id="round-${r}-steward2" placeholder="點選或搜尋" onfocus="showDropMenu(this, 'staff', ${r}, 2)" oninput="filterDropMenu(this, 'staff', ${r}, 2)">
+                            <div class="dropdown-menu-box" id="menu-round-${r}-steward2"></div>
+                        </div>
                     </div>
 
                     <div id="round-${r}-steward-toggle-wrapper" style="display:none;">
@@ -753,11 +629,23 @@
                     </div>
 
                     <div class="form-group row" id="round-${r}-steward-extra-row" style="display:none;">
-                        <div><label>乘務員 3 (TA3)</label><input type="text" id="round-${r}-steward3" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
-                        <div><label>乘務員 4 (TA4)</label><input type="text" id="round-${r}-steward4" placeholder="點選或輸入乘務組員" list="staffList" oninput="syncPersonnelToNextRounds(${r})"></div>
+                        <div class="custom-dropdown">
+                            <label>乘務員 3 (TA3)</label>
+                            <input type="text" id="round-${r}-steward3" placeholder="點選或搜尋" onfocus="showDropMenu(this, 'staff', ${r}, 3)" oninput="filterDropMenu(this, 'staff', ${r}, 3)">
+                            <div class="dropdown-menu-box" id="menu-round-${r}-steward3"></div>
+                        </div>
+                        <div class="custom-dropdown">
+                            <label>乘務員 4 (TA4)</label>
+                            <input type="text" id="round-${r}-steward4" placeholder="點選或搜尋" onfocus="showDropMenu(this, 'staff', ${r}, 4)" oninput="filterDropMenu(this, 'staff', ${r}, 4)">
+                            <div class="dropdown-menu-box" id="menu-round-${r}-steward4"></div>
+                        </div>
                     </div>
 
-                    <div class="form-group"><label>保潔員姓名</label><input type="text" id="round-${r}-cleaner" placeholder="點選或輸入保潔人員" list="cleanerList" oninput="syncPersonnelToNextRounds(${r})"></div>
+                    <div class="form-group custom-dropdown">
+                        <label>保潔員姓名</label>
+                        <input type="text" id="round-${r}-cleaner" placeholder="點選或搜尋" onfocus="showDropMenu(this, 'cleaner', ${r})" oninput="filterDropMenu(this, 'cleaner', ${r})">
+                        <div class="dropdown-menu-box" id="menu-round-${r}-cleaner"></div>
+                    </div>
 
                     <div class="sub-block-title">🚄 一、去程運行記錄表 (西九龍始發)</div>
                     <div id="round-${r}-UP-list"></div>
@@ -780,6 +668,80 @@
         generateRouteForDirection(r, 'DOWN');
         updateStewardVisibility(r);
     }
+
+    // 🛠️ 智能下拉選單核心驅動程式
+    function getMenuId(type, roundNum = null, stewIndex = null) {
+        if (type === 'conductor') return 'menu-conductor';
+        if (stewIndex) return `menu-round-${roundNum}-steward${stewIndex}`;
+        return `menu-round-${roundNum}-${type}`;
+    }
+
+    function showDropMenu(inputEl, type, roundNum = null, stewIndex = null) {
+        // 先關閉畫面上所有的下拉選單
+        closeAllDropMenus();
+        
+        const menuId = getMenuId(type, roundNum, stewIndex);
+        const menuEl = document.getElementById(menuId);
+        const listKey = type; 
+        const items = rawLists[listKey] || [];
+        
+        renderMenuOptions(menuEl, items, inputEl.value, inputEl.id, roundNum);
+        menuEl.style.display = 'block';
+    }
+
+    function filterDropMenu(inputEl, type, roundNum = null, stewIndex = null) {
+        const menuId = getMenuId(type, roundNum, stewIndex);
+        const menuEl = document.getElementById(menuId);
+        const listKey = type;
+        const query = inputEl.value.trim();
+        const items = rawLists[listKey] || [];
+        
+        const filtered = items.filter(name => name.includes(query));
+        renderMenuOptions(menuEl, filtered, query, inputEl.id, roundNum);
+        
+        // 人員手動變更時，同步驅動存檔或聯動
+        if (roundNum) {
+            syncPersonnelToNextRounds(roundNum);
+        } else {
+            saveFormData();
+        }
+    }
+
+    function renderMenuOptions(menuEl, items, query, inputId, roundNum) {
+        menuEl.innerHTML = '';
+        if (items.length === 0) {
+            menuEl.innerHTML = '<div class="dropdown-item no-match">無匹配人員 (直接輸入即可)</div>';
+            return;
+        }
+        items.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerText = name;
+            div.onmousedown = function() {
+                const targetInput = document.getElementById(inputId);
+                targetInput.value = name;
+                menuEl.style.display = 'none';
+                if (roundNum) {
+                    syncPersonnelToNextRounds(roundNum);
+                } else {
+                    saveFormData();
+                }
+            };
+            menuEl.appendChild(div);
+        });
+    }
+
+    function closeAllDropMenus() {
+        const menus = document.querySelectorAll('.dropdown-menu-box');
+        menus.forEach(m => m.style.display = 'none');
+    }
+
+    // 點擊空白處自動收起選單
+    document.addEventListener('mousedown', function(e) {
+        if (!e.target.closest('.custom-dropdown')) {
+            closeAllDropMenus();
+        }
+    });
 
     function initForm() {
         document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
@@ -902,7 +864,6 @@
         }
     }
 
-    // 渲染複選框
     function renderAllCheckboxes(roundNum) {
         const code = roundTerminalCodes[roundNum];
         const terminalName = terminalMapping[code];
@@ -1005,6 +966,7 @@
     }
 
     function triggerSystemPrint() {
+        closeAllDropMenus();
         for (let i = 1; i <= 4; i++) {
             const content = document.getElementById(`content-${i}`);
             if (content) { content.style.display = "block"; content.classList.add('active'); }
@@ -1100,7 +1062,11 @@
         }
     }
 
-    document.getElementById('logForm').addEventListener('input', () => { saveFormData(); });
+    document.getElementById('logForm').addEventListener('input', (e) => { 
+        if (!e.target.closest('.custom-dropdown')) {
+            saveFormData(); 
+        }
+    });
 
     function saveFormData() {
         const formData = {
@@ -1159,12 +1125,12 @@
                 });
             });
         }
-        localStorage.setItem('trainLogBackup_v13_8', JSON.stringify(formData));
+        localStorage.setItem('trainLogBackup_v13_9', JSON.stringify(formData));
         showSaveBadge();
     }
 
     function restoreFormData() {
-        const savedData = localStorage.getItem('trainLogBackup_v13_8');
+        const savedData = localStorage.getItem('trainLogBackup_v13_9');
         if (!savedData) return;
 
         try {
@@ -1242,7 +1208,7 @@
 
     function clearAllLogs() {
         if (confirm('⚠️ 確定要清空今日所有填寫的乘務資料嗎？\n（此操作將無法復原，請確保數據已成功複製並發送給坐堂 TCI）')) {
-            localStorage.removeItem('trainLogBackup_v13_8');
+            localStorage.removeItem('trainLogBackup_v13_9');
             location.reload();
         }
     }
